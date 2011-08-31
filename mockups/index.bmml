@@ -1,0 +1,21 @@
+<mockup version="1.0" skin="sketch" measuredW="1422" measuredH="767" mockupW="1023" mockupH="731">
+  <controls>
+    <control controlID="0" controlTypeID="com.balsamiq.mockups::BrowserWindow" x="399" y="36" w="1023" h="731" measuredW="450" measuredH="400" zOrder="0" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>wulf-web%0Ahttp%3A//localhost%3A8080/wulf</text>
+      </controlProperties>
+    </control>
+    <control controlID="1" controlTypeID="com.balsamiq.mockups::Label" x="414" y="155" w="-1" h="-1" measuredW="130" measuredH="39" zOrder="1" locked="false" isInGroup="-1">
+      <controlProperties>
+        <bold>true</bold>
+        <size>28</size>
+        <text>wulf-web</text>
+      </controlProperties>
+    </control>
+    <control controlID="2" controlTypeID="com.balsamiq.mockups::Label" x="414" y="194" w="305" h="33" measuredW="255" measuredH="21" zOrder="2" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>A%20very%20simple%20web%20interface%20to%20Warewulf</text>
+      </controlProperties>
+    </control>
+  </controls>
+</mockup>
