@@ -17,5 +17,15 @@
         <text>A%20very%20simple%20web%20interface%20to%20Warewulf</text>
       </controlProperties>
     </control>
+    <control controlID="3" controlTypeID="com.balsamiq.mockups::LinkBar" x="414" y="233" w="-1" h="-1" measuredW="411" measuredH="21" zOrder="3" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>Provisioning%2C%20Nodes%2C%20VNFS%20Capsules%2C%20Bootstraps%2C%20Files</text>
+      </controlProperties>
+    </control>
+    <control controlID="4" controlTypeID="com.balsamiq.mockups::Paragraph" x="414" y="269" w="744" h="383" measuredW="200" measuredH="140" zOrder="4" locked="false" isInGroup="-1">
+      <controlProperties>
+        <text>*Node*%09%09%09%09*Cluster*%09%09%09%09*VNFS*%09%09%09%09*Bootstrap*%09%09%09%09%09*Files*%0A%20%0A%5Bwd0031%5D%09%09%09%09UNDEF%09%09%09%09base.centos6%09%09%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts%0A%5Bwd0032%5D%09%09%09%09UNDEF%09%09%09%09base.centos6%09%09%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts%0A%5Bwd0033%09%5D%09%09%09UNDEF%09%09%09%09base.centos6%09%09%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts%0A%5Bwd0034%5D%09%09%09%09UNDEF%09%09%09%09base.centos6%09%09%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts%0A%5Bwd0035%5D%09%09%09%09sgetest%09%09%09%09sge-qmaster.centos6%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts%0A%5Bwd0036%5D%09%09%09%09sgetest%09%09%09%09sge-execd.centos6%092.6.32-71.29.1.el6.x86_64%09%09dynamic_hosts</text>
+      </controlProperties>
+    </control>
   </controls>
 </mockup>
