@@ -1,0 +1,22 @@
+
+<table border=1>
+<tr>
+<td>Node</td> <td>Cluster</td> <td>VNFS</td> <td>Bootstrap</td> <td>Files</td>
+</tr>
+
+<% FOREACH id IN nodelist.keys.sort %>
+
+<tr>
+<td><a href="/node/<% nodelist.$id.name %>"><% nodelist.$id.name %></a></td> <td><% nodelist.$id.cluster %></td> 
+<td><% nodelist.$id.vnfs %></td> <td><% nodelist.$id.bootstrap %></td>
+
+<td>
+	<% FOREACH fid IN nodelist.$id.files %>
+	<% fid %>,
+	<%END%>
+</td>
+
+</tr>
+<% END %>
+
+</table>

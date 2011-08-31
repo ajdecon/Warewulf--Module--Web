@@ -1,0 +1,57 @@
+
+<h1>Node: <% name %></h1>
+
+<form method="post" action="/node/<%name%>">
+<input type="hidden" name="id" value="<%id%>"/>
+
+Hostname: <input type="text" name="name" value="<%name%>"/> <br/>
+Cluster: <input type="text" name="cluster" value="<%cluster%>"/> <br/>
+
+VNFS:
+<select name="vnfs">
+<% FOREACH v IN vnfslist %>
+	<% IF v == vnfs %>
+	<option value="<%v%>" selected="true"><%v%></option>
+	<% ELSE %>
+	<option value="<%v%>"><%v%></option>
+	<% END %>
+<%END%>
+</select>
+
+<br/><br/>
+Bootstrap:
+<select name="vnfs">
+<% FOREACH v IN bootlist %>
+	<% IF v == bootstrap %>
+	<option value="<%v%>" selected="true"><%v%></option>
+	<% ELSE %>
+	<option value="<%v%>"><%v%></option>
+	<% END %>
+<%END%>
+</select>
+
+<br/><br/>
+Files:
+<% FOREACH f IN filelist.keys.sort %>
+	<% IF filelist.$f == "true" %>
+	<input type="checkbox" name="files" value="<%f%>" checked="<%filelist.$f%>"/><%f%>
+	<% ELSE %>
+	<input type="checkbox" name="files" value="<%f%>"/><%f%>
+	<% END %>
+<% END %>
+
+<br/><br/>
+Network Devices:<br/>
+<% FOREACH nd IN netdevs.keys.sort %>
+	Device: <% nd %><br/>
+	<ul>
+	<li>IP:<input type="text" name="<%nd.name%>-ipaddr" value="<% netdevs.$nd.ipaddr %>"/></li>
+	<li>Netmask:<input type="text" name="<%nd.name%>-netmask" value="<%netdevs.$nd.netmask%>"/></li>
+	</ul>
+<% END %>
+
+
+<br/>
+<input type="submit"/>
+<input type="reset"/>
+</form>
