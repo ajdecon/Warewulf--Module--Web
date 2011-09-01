@@ -188,6 +188,10 @@ post '/node/:name' => sub {
 
 	# Get node object.
 	my $nodeSet = $db->get_objects('node','_id',($id));
+	if ($nodeSet->count() == 0) {
+		warn "Can't find this node!\n";
+		return;
+	}
 	my $node = $nodeSet->get_object(0);
 	
 	# Set variables for node object.
