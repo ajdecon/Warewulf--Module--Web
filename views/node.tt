@@ -20,7 +20,7 @@ VNFS:
 
 <br/><br/>
 Bootstrap:
-<select name="vnfs">
+<select name="bootstrap">
 <% FOREACH v IN bootlist %>
 	<% IF v == bootstrap %>
 	<option value="<%v%>" selected="true"><%v%></option>
@@ -45,8 +45,8 @@ Network Devices:<br/>
 <% FOREACH nd IN netdevs.keys.sort %>
 	Device: <% nd %><br/>
 	<ul>
-	<li>IP:<input type="text" name="<%nd.name%>-ipaddr" value="<% netdevs.$nd.ipaddr %>"/></li>
-	<li>Netmask:<input type="text" name="<%nd.name%>-netmask" value="<%netdevs.$nd.netmask%>"/></li>
+	<li>IP:<input type="text" name="<%nd%>-ipaddr" value="<% netdevs.$nd.ipaddr %>"/></li>
+	<li>Netmask:<input type="text" name="<%nd%>-netmask" value="<%netdevs.$nd.netmask%>"/></li>
 	</ul>
 <% END %>
 

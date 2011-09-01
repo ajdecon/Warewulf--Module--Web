@@ -16,10 +16,13 @@ use Warewulf::Provision::HostsFile;
 
 # Use Template-Toolkit for template files.
 set 'template' => 'template_toolkit';
+set 'show_errors' => 1;
 
-# Use a persistent connection to the db.
+# Use a persistent connection to Warewulf facilities.
 my $db = Warewulf::DataStore->new();
-
+my $pxe = Warewulf::Provision::Pxelinux->new();
+my $dhcp = Warewulf::Provision::DhcpFactory->new();
+my $hostsfile = Warewulf::Provision::HostsFile->new();
 
 # Begin common functions.
 
@@ -27,7 +30,22 @@ sub ww_name_by_id {
 	my $type = shift;
 	my $objid = shift;
 	my $objectSet = $db->get_objects($type,"_id",($objid));
+	if ($objectSet->count() < 1) {
+		warn "No object present for $objid!";
+		return;
+	}
 	return ($objectSet->get_object(0))->get("name");
+}
+
+sub ww_id_by_name {
+	my $type = shift;
+	my $objname = shift;
+	my $objectSet = $db->get_objects($type,"name",($objname));
+	if ($objectSet->count() < 1) {
+		warn "No object present for $objname!";
+		return;
+	}
+	return ($objectSet->get_object(0))->get("_id");
 }
 
 sub ww_avail_list {
@@ -134,6 +152,71 @@ get '/node/:name' => sub {
 		'bootlist' => \@bootlist,
 		'filelist' => \%filelist,
 	};
+};
+
+post '/node/:name' => sub {
+
+	# Get good values for parameters
+	my %inputs = params;
+	my $name = $inputs{'name'};
+	my $id = $inputs{'id'};
+	my $cluster = $inputs{'cluster'};
+	my $vnfsid = ww_id_by_name('vnfs',$inputs{'vnfs'});
+	my $bootstrapid = ww_id_by_name('bootstrap',$inputs{'bootstrap'});
+	# Ludicrous array unrolling follows...
+	my @files = $inputs{'files'};
+	my @fileids;
+	foreach my $outer (@files) {
+		if (ref($outer) eq 'ARRAY') {
+			my @outlist = @{$outer};
+			foreach my $inner (@outlist) {
+				push(@fileids,ww_id_by_name('file',$inner));
+			}
+		} else {
+			push(@fileids,ww_id_by_name('file',$outer));
+		}
+	}
+	# Now for the netdevs
+	my %netdevs;
+	foreach my $param (sort keys %inputs) {
+		if ($param =~ /(\w+)-ipaddr/) {
+			$netdevs{$1}{'ipaddr'} = $inputs{$param};
+		} elsif ($param =~ /(\w+)-netmask/) {
+			$netdevs{$1}{'netmask'} = $inputs{$param};
+		}
+	}
+
+	# Get node object.
+	my $nodeSet = $db->get_objects('node','_id',($id));
+	my $node = $nodeSet->get_object(0);
+	
+	# Set variables for node object.
+	$node->set('name',$name);
+	$node->set('vnfsid',$vnfsid);
+	$node->set('bootstrapid',$bootstrapid);
+	$node->set('fileids',@fileids);
+	if (uc($cluster) eq 'UNDEF') {
+		$node->del('cluster');
+	} else {
+		$node->set('cluster',$cluster);
+	}
+	foreach my $nd ($node->get('netdevs')) {
+		if ($netdevs{$nd->get('name')}{'ipaddr'}) {
+			$nd->set('ipaddr', $netdevs{$nd->get('name')}{'ipaddr'});
+			$nd->set('netmask', $netdevs{$nd->get('name')}{'netmask'});	
+		}
+	}
+
+	# Persist and update Warewulf
+	$db->persist($nodeSet);
+	$dhcp->persist();
+	$hostsfile->update_datastore();
+	$pxe->update($node);
+
+	template 'success.tt', {
+		'newaddr' => "/node/$name"
+	};
+
 };
 
 dance;
