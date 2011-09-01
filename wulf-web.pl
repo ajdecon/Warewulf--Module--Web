@@ -216,7 +216,7 @@ post '/node/:name' => sub {
 	$node->set('vnfsid',$vnfsid);
 	$node->set('bootstrapid',$bootstrapid);
 	$node->set('fileids',@fileids);
-	if (uc($cluster) eq 'UNDEF') {
+	if ( (uc($cluster) eq 'UNDEF') or ($cluster eq "") ){
 		$node->del('cluster');
 	} else {
 		$node->set('cluster',$cluster);
@@ -344,7 +344,7 @@ get '/file' => sub {
 	my $fileSet = $db->get_objects('file','name',());
 	my %fileList;
 	foreach my $file ($fileSet->get_list()) {
-		$fileList{$file->get('name')} = sprintf("%f",$file->get('size'));
+		$fileList{$file->get('name')} = sprintf("%f.",$file->get('size'));
 	}
 
 	template 'file.tt', {
@@ -381,6 +381,50 @@ post '/file/delete' => sub {
 	template 'success.tt', {
 		'newaddr'=>"/file",
 	};
+};
+
+post '/new/file' => sub {
+	my $upload = upload('file');
+	my $name = $upload->basename();
+	my $overwrite = params->{overwrite};
+	my $path = $upload->tempname();
+	my $digest = digest_file_hex_md5($upload->tempname());
+	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size, $atime,$mtime,$ctime,$blksize,$blocks) = stat($path);
+	my $objectSet = $db->get_objects('file','name',($name));
+	my @objectList = $objectSet->get_list();
+	my $file;
+	if (scalar(@objectList) == 1) {
+		if (not $overwrite) {
+			print "File $name already exists!\n";
+			return;	
+		} else {
+			$file = $objectList[0];
+		}
+	} else {
+		$file = Warewulf::DSOFactory->new('file');
+	}
+	$db->persist($file);
+	$file->set('name',$name);
+	$file->set('checksum',$digest);
+	my $binstore = $db->binstore($file->get('_id'));
+        my $buffer;
+        open(FILE, $path);
+        while(my $length = sysread(FILE, $buffer, 15*1024*1024)) {
+                $binstore->put_chunk($buffer);
+        }
+        close FILE;
+        $file->set("size", $size);
+        $file->set("uid", $uid);
+        $file->set("gid", $gid);
+        $file->set("mode", sprintf("%05o", $mode & 07777));
+        $file->set("path", $path);
+        $db->persist($file);
+
+	template 'success.tt', {
+		'newaddr' => "/file/$name",
+	};
+		
+	
 };
 
 # Show file information
@@ -457,7 +501,7 @@ post '/file/:name' => sub {
         my $file = $fileSet->get_object(0);
 	
 	# Check if contents changed; if so, change them.
-	if ($persist) {
+#	if ($persist) {
 		my $rand = rand_string(16);
         	my $tmpfile = "/tmp/wwsh.$rand";
 	        my $digest1;
@@ -485,7 +529,7 @@ post '/file/:name' => sub {
 		    $file->set('size',$size);
 		    
 		}
-	}
+#	}
 
 	# Save metadata
 	$file->set('name',$name);
