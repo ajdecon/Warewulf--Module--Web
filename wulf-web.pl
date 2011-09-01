@@ -24,8 +24,11 @@ my $pxe = Warewulf::Provision::Pxelinux->new();
 my $dhcp = Warewulf::Provision::DhcpFactory->new();
 my $hostsfile = Warewulf::Provision::HostsFile->new();
 
+###############################################################################
 # Begin common functions.
-
+#
+# ww_name_by_id(object_type, object_id)
+#   Return name of Warewulf object from ID
 sub ww_name_by_id {
 	my $type = shift;
 	my $objid = shift;
@@ -37,6 +40,8 @@ sub ww_name_by_id {
 	return ($objectSet->get_object(0))->get("name");
 }
 
+# ww_id_by_name(object_type,object_name)
+#   Return ID of Warewulf object from name.
 sub ww_id_by_name {
 	my $type = shift;
 	my $objname = shift;
@@ -48,6 +53,8 @@ sub ww_id_by_name {
 	return ($objectSet->get_object(0))->get("_id");
 }
 
+# ww_avail_list
+#   Return a list of all objects of a given type.
 sub ww_avail_list {
 	my $type = shift;
 	my $objectSet = $db->get_objects($type,"_id",());
@@ -58,15 +65,13 @@ sub ww_avail_list {
 	return @list;
 }
 
-
+###############################################################################
 # Begin route handlers.
-
+#
 # Index page: show a basic provisioning view.
 get '/' => sub {
-
 	my $nodeSet = $db->get_objects("node","name",());
 	my %nodes;
-
 	foreach my $n ($nodeSet->get_list()) {
 		my $id = $n->get("_id");
 		my $name = $n->get("name");
@@ -82,7 +87,6 @@ get '/' => sub {
 		foreach my $f (@fileids) {
 			push(@files,ww_name_by_id("file",$f));
 		}
-
 		$nodes{$name} = {
 			"name" => $name,
 			"cluster" => $cluster,
@@ -95,14 +99,15 @@ get '/' => sub {
 	template 'provlist.tt', {
 		'nodelist' => \%nodes
 	};	
-
 };
 
+# Return node control page (GET)
 get '/node/:name' => sub {
-	
+	# Get node object
 	my $nodeSet = $db->get_objects("node","name",(params->{name}));
 	my $n = $nodeSet->get_object(0);
 	
+	# Get all node properties.
         my $id = $n->get("_id");
 	my $name = $n->get("name");
         my $cluster = $n->get("cluster");
@@ -115,21 +120,15 @@ get '/node/:name' => sub {
         foreach my $f ($n->get("fileids")) {
                 push(@files,ww_name_by_id("file",$f));
         }
-
-	my %netdevs;
-	
-	 
+	my %netdevs;	 
         foreach my $nd ($n->get("netdevs")) {
 		$netdevs{$nd->get("name")} = { "ipaddr" => $nd->get("ipaddr"), "netmask" => $nd->get("netmask") };
 	}
-
 	my @vnfslist = ww_avail_list("vnfs");
 	my @bootlist = ww_avail_list("bootstrap");
 	my @fileavail = ww_avail_list("file");
-	
 	my %filelist;
 	for my $f (@fileavail) {
-		
 		foreach my $g (@files) {
 			if ($f eq $g) {
 				$filelist{$f} = "true";
@@ -139,7 +138,8 @@ get '/node/:name' => sub {
 			$filelist{$f} = "false";
 		}
 	}
-
+	
+	# Write out page using template.
 	template 'node.tt', {
 		'id' => $id,
 		'name' => $name,
@@ -154,9 +154,9 @@ get '/node/:name' => sub {
 	};
 };
 
+# Set node properties (POST)
 post '/node/:name' => sub {
-
-	# Get good values for parameters
+	# Get values for parameters
 	my %inputs = params;
 	my $name = $inputs{'name'};
 	my $id = $inputs{'id'};
@@ -219,4 +219,5 @@ post '/node/:name' => sub {
 
 };
 
+# Run Dancer server.
 dance;
