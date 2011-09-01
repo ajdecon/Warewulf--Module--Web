@@ -1,3 +1,8 @@
+<h1>warewulf-web</h1>
+
+<p>
+<a href="/node">Node Summary</a> | <a href="/vnfs">VNFS Capsules</a> | <a href="/bootstrap">Bootstraps</a> | <a href="/file">Files</a>
+</p>
 
 <table border=1>
 <tr>
@@ -11,9 +16,11 @@
 <td><% nodelist.$id.vnfs %></td> <td><% nodelist.$id.bootstrap %></td>
 
 <td>
+	<ul>
 	<% FOREACH fid IN nodelist.$id.files %>
-	<% fid %>,
+	<li><% fid %></li>
 	<%END%>
+	</ul>
 </td>
 
 </tr>
