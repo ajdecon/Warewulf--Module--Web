@@ -9,6 +9,8 @@
 <h2>Node: <% name %></h2>
 
 <form method="post" action="/node/<%name%>">
+
+<table border=0 width="100%" cellpadding="10"><tr><td>
 <input type="hidden" name="id" value="<%id%>"/>
 
 Hostname: <input type="text" name="name" value="<%name%>"/> <br/>
@@ -61,4 +63,21 @@ Network Devices:<br/>
 <br/>
 <input type="submit"/>
 <input type="reset"/>
+</td>
+
+<td align="right" valign="top">
+<h3>Advanced Options</h3>
+
+Kernel Args: <input type="text" name="kargs" value="<%kargs%>"/> <br/>
+Filesystems: <input type="text" name="filesystems" value="<%filesystems%>"/> <br/>
+Diskparition: <input type="text" name="diskpartition" value="<%diskpartition%>"/> <br/>
+Diskformat: <input type="text" name="diskformat" value="<%diskformat%>"/> <br/>
+Bootlocal: 
+	<%IF bootlocal==1 %>
+	<input type="checkbox" name="bootlocal" value="1" checked="true">
+	<% ELSE %>
+	<input type="checkbox" name="bootlocal" value="1">
+	<%END%>
+</select>
+</td></tr></table>
 </form>

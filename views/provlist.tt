@@ -1,5 +1,5 @@
 
-<table border=0>
+<table border=0 cellspacing="10">
 <tr><td><img src="/images/ww-web.png" height=200/></td><td><h1>warewulf-web</h1></td></tr>
 </table>
 
@@ -9,7 +9,7 @@
 
 <table border=1>
 <tr>
-<td>Node</td> <td>Cluster</td> <td>VNFS</td> <td>Bootstrap</td> <td>Files</td>
+<td><b>Node</b></td> <td><b>Cluster</b></td> <td><b>VNFS</b></td> <td><b>Bootstrap</b></td> <td><b>Files</b></td>
 </tr>
 
 <% FOREACH id IN nodelist.keys.sort %>
@@ -21,7 +21,7 @@
 <td>
 	<ul>
 	<% FOREACH fid IN nodelist.$id.files %>
-	<li><% fid %></li>
+	<li><a href="/file/<%fid%>"><% fid %></a></li>
 	<%END%>
 	</ul>
 </td>

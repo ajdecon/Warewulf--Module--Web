@@ -155,6 +155,39 @@ get '/node/:name' => sub {
 			$filelist{$f} = "false";
 		}
 	}
+
+	# Advanced options
+	my $kargs = $n->get('kargs') or 'UNDEF';
+	my $fstemp = $n->get('filesystems') or 'UNDEF';
+	my $filesystems = "";
+	if (ref($fstemp) eq 'ARRAY') {
+		foreach my $fs (@{$fstemp}) {
+			$filesystems .= "$fs,";
+		}
+	} else {
+		$filesystems = $fstemp;
+	}
+
+	my $dptemp = $n->get('diskpartition') or 'UNDEF';
+	my $diskpartition = "";
+	if (ref($dptemp) eq 'ARRAY') {
+		foreach my $dp (@{$dptemp}) {
+			$diskpartition .= "$dp,";
+		}
+	} else {
+		$diskpartition = $dptemp;
+	}
+
+	my $dftemp = $n->get('diskformat') or 'UNDEF';
+	my $diskformat = "";
+	if (ref($dftemp) eq 'ARRAY') {
+		foreach my $df (@{$dftemp}) {
+			$diskformat .= "$df,";
+		}
+	} else {
+		$diskformat = $dftemp;
+	}
+	my $bootlocal = $n->get('bootlocal') or 0;
 	
 	# Write out page using template.
 	template 'node.tt', {
@@ -168,6 +201,11 @@ get '/node/:name' => sub {
 		'vnfslist' => \@vnfslist,
 		'bootlist' => \@bootlist,
 		'filelist' => \%filelist,
+		'kargs' => $kargs,
+		'filesystems' => $filesystems,
+		'diskpartition' => $diskpartition,
+		'diskformat' => $diskformat,
+		'bootlocal' => $bootlocal,
 	};
 };
 
@@ -210,7 +248,43 @@ post '/node/:name' => sub {
 		return;
 	}
 	my $node = $nodeSet->get_object(0);
-	
+
+	# Advanced options
+	my $kargs = $inputs{'kargs'} . " ";
+	if ($kargs and ($kargs ne 'UNDEF')) {
+		$node->set('kargs',$kargs);
+	} else {
+		$node->del('kargs');
+	}
+	my @filesystems;
+	if ($inputs{'filesystems'} and ($inputs{'filesystems'} ne 'UNDEF')) {
+		@filesystems = split(/,/,$inputs{'filesystems'});
+		$node->set('filesystems',@filesystems);
+	} else {
+		$node->del('filesystems');
+	}
+	my @diskformat;
+	if ($inputs{'diskformat'} and ($inputs{'diskformat'} ne 'UNDEF')) {
+		@diskformat = split(/,/,$inputs{'diskformat'});
+		$node->set('diskformat',@diskformat);
+	} else {
+		$node->del('diskformat');
+	}
+	my @diskpartition;
+	if ($inputs{'diskpartition'} and ($inputs{'diskpartition'} ne 'UNDEF')) {
+		@diskpartition = split(/,/,$inputs{'diskpartition'});
+		$node->set('diskpartition',@diskpartition);
+	} else {
+		$node->del('diskpartition');
+	}
+	my $bootlocal = $inputs{'bootlocal'};
+	if ($bootlocal == 1) {
+		$node->set('bootlocal',$bootlocal);
+	} else {
+		$node->del('bootlocal');
+	}
+
+		
 	# Set variables for node object.
 	$node->set('name',$name);
 	$node->set('vnfsid',$vnfsid);
