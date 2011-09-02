@@ -14,7 +14,6 @@ use Warewulf::Provision::Pxelinux;
 use Warewulf::Provision::DhcpFactory;
 use Warewulf::Provision::HostsFile;
 use Warewulf::Util;
-use Digest::MD5 qw(md5_hex);
 
 # Use Template-Toolkit for template files.
 set 'template' => 'template_toolkit';
