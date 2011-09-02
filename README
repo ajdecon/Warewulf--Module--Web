@@ -1,0 +1,2 @@
+To run a Dancer test server, run "perl wulf-web.pl" as root. 
+Then point your browser to port 3000 on this machine.
