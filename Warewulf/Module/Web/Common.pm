@@ -2,9 +2,12 @@
 
 use Warewulf::DataStore;
 use Warewulf::Util;
+use Exporter;
+
+my @EXPORT = qw(&get_object &get_full_list);
+
 
 my $db = Warewulf::DataStore->new();
-
 my @valid_types = ('vnfs', 'file', 'node', 'bootstrap');
 
 sub get_object {
