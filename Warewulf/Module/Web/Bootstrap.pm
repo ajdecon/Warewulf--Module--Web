@@ -21,7 +21,7 @@ get '/all' => {
     my %objdata;
     foreach my $o (@objects) {
         %objdata{$o->get('name')}{'size'} = $o->get('size');
-        %objdata{$o->get('name')}{'size_mb'} = sprintf('%.1f',$o->get('size'));
+        %objdata{$o->get('name')}{'size_mb'} = sprintf('%.1f',$o->get('size')/(1024*1024));
     }
 
     template "$type/all.tt", {

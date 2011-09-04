@@ -4,13 +4,13 @@ use Warewulf::DataStore;
 use Warewulf::Util;
 use Exporter;
 
-my @EXPORT = qw(&get_object &get_full_list);
+my @EXPORT = qw(ww_get_object ww_get_full_list);
 
 
 my $db = Warewulf::DataStore->new();
 my @valid_types = ('vnfs', 'file', 'node', 'bootstrap');
 
-sub get_object {
+sub ww_get_object {
 
     my $type = shift;
     my $name = shift;
@@ -28,7 +28,31 @@ sub get_object {
 
 };
 
-sub get_full_list {
+sub ww_get_full_list {
     my $type = shift;
     return ($db->get_objects($type,'name',()))->get_list();
+}
+
+sub ww_validate_param {
+    my $type = shift;
+    my $attribute = shift;
+    my $value = shift;
+
+    return $value;
+
+}
+
+sub ww_del_object {
+
+    my $type = shift;
+    my $name = shift;
+    my $object = ww_get_object($type,$name);
+    $db->del($object);
+}
+
+sub ww_persist_object {
+    my $object = shift;
+    if ($object) {
+        $db->persist($object);
+    }
 }
