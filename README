@@ -9,5 +9,8 @@ Berkeley National Lab.
 It's currently built on Dancer, a simple RESTful framework
 for Perl, and the Warewulf Perl API.
 
+The default username and password are "admin"/"warewulf"
+and are set in variables in wulf-dance.pl. 
+
 To run a Dancer test server, run "perl wulf-dance.pl" as root. 
 Then point your browser to port 3000 on this machine.
