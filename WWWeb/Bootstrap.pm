@@ -61,4 +61,39 @@ post '/delete' => sub {
 	};
 };
 
+post '/upload' => sub {
 
+	my $bsObj = Warewulf::Provision::Bootstrap->new();
+
+	my $upload = upload('file');
+	my $name = $upload->basename();
+	$name =~ s/\.wwbs//;
+	my $path = $upload->tempname();
+	my $digest = digest_file_hex_md5($path);
+	my $obj = Warewulf::DSOFactory->new('bootstrap');
+	$db->persist($obj);
+
+	$obj->set('name',$name);
+	$obj->set('checksum',$digest);
+	my $binstore = $db->binstore($obj->get('_id'));
+	my $buffer;
+	my $size;
+        open(SCRIPT, $path);
+        while(my $length = sysread(SCRIPT, $buffer, $db->chunk_size())) {
+                if (! $binstore->put_chunk($buffer)) {
+                      $db->del_object($obj);
+                      return();
+                }
+                $size += $length;
+        }
+        close SCRIPT;
+        $obj->set("size", $size);
+        $db->persist($obj);
+
+	$bsObj->build_bootstrap($obj);
+
+	template 'success.tt', {
+		'newaddr' => '/bootstrap',
+	};
+
+};
