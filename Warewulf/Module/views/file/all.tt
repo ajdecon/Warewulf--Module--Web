@@ -1,0 +1,25 @@
+<h2>Files Summary</h2>
+
+<p>
+<form action="/file/delete" method="post">
+<table border=0>
+<% FOREACH name IN file.keys.sort %>
+<tr><td><input type="checkbox" name="file" value="<%name%>"/> </td> <td><a href="/file/view/<%name%>"><% name %></a></td> <td><% file.$name %> bytes</td> </tr>
+<% END %>
+</table>
+<input type="submit" value="Delete Checked"/>
+</form>
+
+</p>
+
+
+<br/>
+<p>
+<form action="/file/upload" method="post" enctype="multipart/form-data">
+
+Upload new file: <input type="file" name="file"/>
+<br/><input type="checkbox" name="overwrite" value="overwrite"/>Overwrite?
+<br/><input type="submit" value="Upload"/>
+
+</form>
+</p>

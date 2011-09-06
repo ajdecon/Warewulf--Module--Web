@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package Warewulf::Module::Web::File;
+package WWWeb::File;
 
 use Dancer;
 use Template;
@@ -8,172 +8,86 @@ use Warewulf::DataStore;
 use Warewulf::Util;
 
 set 'template' => 'template_toolkit';
-
-my $type = 'file';
-my @attributes = ('name','uid','gid','size','checksum','mode','path','_id');
+set 'layout' => 'main';
 
 prefix '/file';
 
-# Begin functions
+my $db = Warewulf::DataStore->new();
 
-# Check a named file parameter for validity
-sub validate_file_param {
+# Display file list
 
-    my $name = shift;
-    my $value = shift;
-
-    if (lc($name) eq 'path') {
-        if (not ($value =~ /^([a-zA-Z0-9\-_\/\.]+)$/)) {
-        return 0;
-    }
-    } elsif (lc($name) eq ('uid' or 'gid') ) {
-        if (not ($value =~ /^[0-9]+$/)) {
-            return 0;
-        }
-    } elsif (lc($name) eq 'name') {
-        if (not ($value =~ /^[a-zA-Z0-9\-_\.]+$/)) {
-        return 0;
-    }
-    } elsif (lc($name) eq 'mode') {
-        if (not ($value =~ /^[0-7]{3,4}$/)) {
-        return 0;
-    }
-    } else {
-        warn "Invalid parameter $name";
-    return 0;
-    }
-
-    return $value;
-}
-
-# Begin route handlers
-
-get '/all' => {
-
-    my $db = Warewulf::DataStore->new();
-    my @objects = ($db->get_objects($type,'name',()))->get_list();
-    my %objdata;
-    foreach my $o (@objects) {
-        foreach my $a (@attributes) {
-            %objdata{$o->get('name')}{"$a"} = $o->get("$a");
-        }
-    }
-
-    template "$type/all.tt", {
-        'objects' => %objdata,
-    };
+get '/' => sub {
+	forward('/file/all');
 };
 
+get '/all' => sub {
 
-get '/view/:name' => {
+	my $fileSet = $db->get_objects('file','name',());
+	my %fileList;
+	foreach my $file ($fileSet->get_list()) {
+		$fileList{$file->get('name')} = sprintf("%f.",$file->get('size'));
+	}
 
-    my $db = Warewulf::DataStore->new();
-    my $name = params->{name};
-    my @objects = ( $db->get_objects($type,'name',($name)) )->get_list();
-
-    if (@objects==0) {
-        warn "$type $name not found!";
-        return;
-    } elsif (@objects>1) {
-        warn "More than one match to $type $name!";
-        return;
-    }
-
-    my $o = $objects[0];
-    my %objdata;
-    foreach my $a (@attributes) {
-        %objdata{"$a"} = $o->get("$a");
-    }
-
-    template "$type/view.tt", {
-        'objects' => %objdata,
-    };
+	template 'file/all.tt', {
+		'file' => \%fileList,
+	};
 
 };
 
-post '/set/:name' => {
+# Delete existing file
+post '/delete' => sub {
 
-    my $db = Warewulf::DataStore->new();
-    my $name = params->{name};
-    my @objects = ( $db->get_objects($type,'name',($name)) )->get_list();
+	# Get list of VNFS's to delete.
+	# If >1 item, needs to be double-unrolled.
+	my @fileParams = params->{file};
+	my @fileNames;
+	foreach my $item (@fileParams) {
+		if (ref($item) eq 'ARRAY') {
+			foreach my $subitem (@{$item}) {
+				push(@fileNames,$subitem);
+			}
+		} else {
+			push(@fileNames,$item);
+		}
+	}
 
-    if (@objects==0) {
-        warn "$type $name not found!";
-        return;
-    } elsif (@objects>1) {
-        warn "More than one match to $type $name!";
-        return;
-    }
+	# Get VNFS objects to be deleted.
+	my $fileSet = $db->get_objects('file','name',@fileNames);
+	if ($fileSet->count() < @fileNames) {
+		print "Only found " . $fileSet->count() . " of the " . @fileNames . " VNFS's\n";
+		return;	
+	}
+	$db->del_object($fileSet);
 
-    my $object = $objects[0];
-    my %pars = params;
-    foreach my $a (@attributes) {
-        if ($pars{"$a"}) {
-            my $valid = validate_file_param($a,$pars{"a"});
-            if ($valid) {
-                $object->set("$a",$valid);
-            }
-        }
-    }
-
-    $db->persist($object);
-
-    template "$type/success.tt", {
-        'newaddr' => "/$type",
-    };
+	template 'success.tt', {
+		'newaddr'=>"/file",
+	};
 };
 
-
-post '/delete' => {
-
-    my $db = Warewulf::DataStore->new();
-    my @nameParams = params->{name};
-    # Need to double-unroll array
-    my @names;
-    if (ref($nameParams[0]) eq 'ARRAY') {
-        foreach my $item (@{$nameParams[0]}) {
-        push(@names,$item);
-    }
-    } else {
-        push(@names,$nameParams[0]);
-    }
-    my @objects = @db->get_objects($type,'name',@names);
-
-    $db->del_object($object[0]);
-
-    template "$type/success.tt", {
-        'newaddr' => "/$type",
-    };    
-};
-
-
-post '/upload' => {
-    
-    my $db = Warewulf::DataStore->new();
-
-    my $upload = upload('file');
-    my $name = $upload->basename();
-    my $overwrite = params->{overwrite};
-    my $path = $upload->tempname();
-    my $digest = digest_file_hex_md5($upload->tempname());
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size, $atime,$mtime,$ctime,$blksize,$blocks) = stat($path);
-    my $objectSet = $db->get_objects($type,'name',($name));
-    my @objectList = $objectSet->get_list();
-    my $file;
-    if (scalar(@objectList) == 1) {
-        if (not $overwrite) {
-            print "$type $name already exists!\n";
-            return;    
-        } else {
-            $file = $objectList[0];
-        }
-    } else {
-        $file = Warewulf::DSOFactory->new('file');
-    }
-    $db->persist($file);
-    $file->set('name',$name);
-    $file->set('checksum',$digest);
-    my $binstore = $db->binstore($file->get('_id'));
+post '/upload' => sub {
+	my $upload = upload('file');
+	my $name = $upload->basename();
+	my $overwrite = params->{overwrite};
+	my $path = $upload->tempname();
+	my $digest = digest_file_hex_md5($upload->tempname());
+	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size, $atime,$mtime,$ctime,$blksize,$blocks) = stat($path);
+	my $objectSet = $db->get_objects('file','name',($name));
+	my @objectList = $objectSet->get_list();
+	my $file;
+	if (scalar(@objectList) == 1) {
+		if (not $overwrite) {
+			print "File $name already exists!\n";
+			return;	
+		} else {
+			$file = $objectList[0];
+		}
+	} else {
+		$file = Warewulf::DSOFactory->new('file');
+	}
+	$db->persist($file);
+	$file->set('name',$name);
+	$file->set('checksum',$digest);
+	my $binstore = $db->binstore($file->get('_id'));
         my $buffer;
         open(FILE, $path);
         while(my $length = sysread(FILE, $buffer, 15*1024*1024)) {
@@ -187,9 +101,131 @@ post '/upload' => {
         $file->set("path", $path);
         $db->persist($file);
 
-    template "$type/success.tt", {
-        'newaddr' => "/$type",
-    };
+	template 'success.tt', {
+		'newaddr' => "/file/view/$name",
+	};
+		
+	
+};
+
+# Show file information
+get '/view/:name' => sub {
+	my $name = params->{name};
+	my $fileSet = $db->get_objects('file','name',($name));
+	if ($fileSet->count() == 0) {
+		print "No file $name found!\n";
+	}
+	my $file = $fileSet->get_object(0);
+	my $uid = $file->get('uid');
+	my $gid = $file->get('gid');
+	my $path = $file->get('path');
+	my $mode = $file->get('mode');
+	my $id = $file->get('_id');
+
+	# Get file contents
+	my $contents = "";
+	my $binstore = $db->binstore($file->get('_id'));
+	while (my $buffer = $binstore->get_chunk()) {
+		$contents = $contents . $buffer;
+	}
+
+	template 'file/view.tt', {
+		'name' => $name,
+		'id' => $id,
+		'uid' => $uid,
+		'gid' => $gid,
+		'path' => $path,
+		'mode' => $mode,
+		'contents' => $contents,
+	};
+
+};
+
+# Set file information
+post '/set/:name' => sub {
+	my $name = params->{name};
+	my $id = params->{id};
+	my $uid = params->{uid};
+	my $gid = params->{gid};
+	my $path = params->{path};
+	my $mode = params->{mode};
+	my $contents = params->{contents};
+	my $persist = params->{persist};
+
+	# Start checking for validity
+	my $invalid = "";
+	if (not ($path =~ /^([a-zA-Z0-9\-_\/\.]+)$/)) {
+		$invalid = $invalid . " path ";
+	}
+	if (not ($uid =~ /^[0-9]+$/) ) {
+		$invalid = $invalid . " uid ";
+	}
+	if (not ($gid =~ /^[0-9]+$/) ) {
+		$invalid = $invalid . " gid ";
+	}
+	if (not ($name =~ /^[a-zA-Z0-9\-_\.]+$/)) {
+		$invalid = $invalid . " name ";
+	}
+	if (not ($mode =~ /^[0-7]{3,4}$/)) {
+		$invalid = $invalid . " mode ";
+	}
+	if ($invalid ne "") {
+		print "Can't save! Invalid " . $invalid;
+		return;
+	}
+
+	# Get file object
+        my $fileSet = $db->get_objects('file','_id',($id));
+        if ($fileSet->count() == 0) {
+                print "No file $name found!\n";
+        }
+        my $file = $fileSet->get_object(0);
+	
+	# Check if contents changed; if so, change them.
+#	if ($persist) {
+		my $rand = rand_string(16);
+        	my $tmpfile = "/tmp/wwsh.$rand";
+	        my $digest1;
+        	my $digest2;
+		open(TMPFILE,">$tmpfile") or die "File error!\n";
+		print TMPFILE $contents;
+		close(TMPFILE);
+		$digest1 = $file->get('checksum');
+		$digest2 = digest_file_hex_md5($tmpfile);
+		my $size = 0;
+
+		if ($digest1 ne $digest2) {
+		    my $buffer;
+                    open(FILE, $tmpfile);
+		    my $binstore = $db->binstore($file->get("_id"));
+                    while(my $length = sysread(FILE, $buffer, 15*1024*1024)) {
+			$binstore->put_chunk($buffer);
+#                        if (! $size) {
+#                            $file->set("format", &format($buffer));
+#                        }
+                        $size += $length;
+                    }
+		    close(FILE);
+		    $file->set('checksum',$digest2);
+		    $file->set('size',$size);
+		    
+		}
+#	}
+
+	# Save metadata
+	$file->set('name',$name);
+	$file->set('uid',$uid);
+	$file->set('gid',$gid);
+	$file->set('path',$path);
+	$file->set('mode',$mode);
+
+
+	$db->persist($fileSet);
+
+	template 'success.tt', {
+		'newaddr' => "/file/view/$name",
+	};
+
 };
 
 

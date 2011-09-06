@@ -1,0 +1,30 @@
+<h2>Bootstrap Summary</h2>
+
+<p>
+<form action="/bootstrap/delete" method="post">
+<table border=0>
+<% FOREACH name IN bootstrap.keys.sort %>
+<tr><td><input type="checkbox" name="bootstrap" value="<%name%>"/> </td> <td><% name %></td> <td><% bootstrap.$name %> M</td> </tr>
+<% END %>
+</table>
+<input type="submit" value="Delete Checked"/>
+</form>
+
+</p>
+
+<p>
+To add a new bootstrap, package a kernel and drivers on the server using <b>wwbootstrap</b>.
+</p>
+
+
+<!--
+<br/>
+<p>
+<form action="/vnfs/upload" method="post" enctype="multipart/form-data">
+
+Upload new .vnfs capsule: <input type="file" name="vnfs"/>
+<br/><input type="submit" value="Upload"/>
+
+</form>
+</p>
+-->

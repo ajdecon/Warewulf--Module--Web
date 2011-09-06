@@ -63,6 +63,11 @@ sub ww_id_by_name {
 
 
 # Begin route handlers
+
+get '/' => sub {
+	forward("/node/all");
+};
+
 get '/all' => sub {
 	my $nodeSet = $db->get_objects("node","name",());
 	my %nodes;
