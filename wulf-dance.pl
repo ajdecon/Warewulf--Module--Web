@@ -14,7 +14,6 @@ set 'username' => 'admin';
 set 'password' => 'warewulf';
 
 before sub {
-
     if (! session('user') && request->path_info !~ m{^/login}) {
          var requested_path => request->path_info;
         request->path_info('/login');
