@@ -1,2 +1,13 @@
-To run a Dancer test server, run "perl wulf-web.pl" as root. 
+===========================================================
+| ww-web: A simple web interface to Warewulf              |
+===========================================================
+
+ww-web is a very basic web interface for Warewulf, an HPC-
+oriented provisioning system developed out of 
+Berkeley National Lab. 
+
+It's currently built on Dancer, a simple RESTful framework
+for Perl, and the Warewulf Perl API.
+
+To run a Dancer test server, run "perl wulf-dance.pl" as root. 
 Then point your browser to port 3000 on this machine.
