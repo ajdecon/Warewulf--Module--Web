@@ -9,15 +9,13 @@ use Warewulf::Util;
 use Warewulf::Module::Web::Common;
 
 set 'template' => 'template_toolkit';
-
-my $db = Warewulf::DataStore->new();
-my $type = 'bootstrap';
-
 prefix '/bootstrap';
+my $type = 'bootstrap';
 
 get '/all' => {
 
-    my @objecs = ww_get_full_list($type);
+    my $db = Warewulf::DataStore->new();
+    my @objects = ($db->get_objects($type,'name',()))->get_list();
     my %objdata;
     foreach my $o (@objects) {
         %objdata{$o->get('name')}{'size'} = $o->get('size');
