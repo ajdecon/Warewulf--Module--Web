@@ -10,6 +10,8 @@ use WWWeb::File;
 
 prefix undef;
 set session => 'Simple';
+set 'username' => 'admin';
+set 'password' => 'warewulf';
 
 before sub {
 
@@ -24,7 +26,7 @@ get '/login' => sub {
 };
 
 post '/login' => sub {
-	if (params->{user} eq 'admin' && params->{pass} eq 'wulf') {
+	if ( params->{user} eq setting('username') && params->{pass} eq setting('password') ) {
 		session user => params->{user};
 		redirect params->{path} || '/';
 	} else {

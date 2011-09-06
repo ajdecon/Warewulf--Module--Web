@@ -1,6 +1,7 @@
 
+<b>Please log in...</b><br/>
 <form action="/login" method="post">
-<input type="text" name="user" value="User"/><br/>
-<input type="password" name="pass"/><br/>
+Username: <input type="text" name="user"/><br/>
+Password: <input type="password" name="pass"/><br/>
 <input type="submit"/>
 </form>
