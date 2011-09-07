@@ -7,11 +7,16 @@ oriented provisioning system developed out of
 Berkeley National Lab.  It's currently built on Dancer, a 
 simple RESTful framework for Perl, and the Warewulf Perl API.
 
-It depends on Warewulf, Plack::Runner and the Template 
-Toolkit.
+Dependencies include:
+ - warewulf-common, warewulf-provision and warewulf-vnfs
+ - Dancer
+ - Plack::Runner
+ - Template Toolkit
+ - Apache with Plack::Handler::Apache2, or any 
+   PSGI-capable web server.
 
 ======================= RUNNING ==========================
-To run using the development server, run 
+To run using the Dancer development server, run 
 "perl Warewulf-Module-Web/bin/app.pl"
 
 To run in Apache on port 8080, edit warewulf-web.conf and
