@@ -289,7 +289,12 @@ post '/set/:name' => sub {
 	$hostsfile->update_datastore();
 	#$pxe->update($node);
 
-	my $result = "bin/provision $id";
+	# Hacky, hacky way to get around root requirement.
+	use Cwd;
+	my $cwd = getcwd();
+	chdir('../bin');
+	my $result = `./provision $id`;
+	chdir($cwd);
 
 	template 'success.tt', {
 		'newaddr' => "/node/view/$name"
