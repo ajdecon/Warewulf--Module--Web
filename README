@@ -1,16 +1,32 @@
-=========================================================
+===========================================================
 | ww-web: A simple web interface to Warewulf              |
 ===========================================================
 
 ww-web is a very basic web interface for Warewulf, an HPC-
 oriented provisioning system developed out of 
-Berkeley National Lab. 
+Berkeley National Lab.  It's currently built on Dancer, a 
+simple RESTful framework for Perl, and the Warewulf Perl API.
 
-It's currently built on Dancer, a simple RESTful framework
-for Perl, and the Warewulf Perl API.
+It depends on Warewulf, Plack::Runner and the Template 
+Toolkit.
 
+======================= RUNNING ==========================
 To run using the development server, run 
 "perl Warewulf-Module-Web/bin/app.pl"
 
-To run in Apache on port 8080, copy warewulf-web.conf into
-your httpd/conf.d directory and restart apache.
+To run in Apache on port 8080, edit warewulf-web.conf and
+copy it into your httpd/conf.d directory, then restart 
+httpd.
+
+============== IMPORTANT: ROOT PRIVILEGE =================
+The DHCP and Pxelinux facilities in the Warewulf API make
+changes to dhcpd.conf and to files in the tftpboot to 
+control provisioning. This requires root-level privileges.
+To implement this, the webapp calls a setuid C-wrapper binary 
+bin/provision to a Perl script bin/provision.pl, which
+triggers the update. Make sure that bin/provision is owned
+by root, but nothing else should be. The source to this
+binary is in csrc/provision.c.
+
+This is an ugly, ugly hack and will be changed as soon as
+I find a better way to do it.

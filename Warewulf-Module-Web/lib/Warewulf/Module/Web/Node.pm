@@ -285,9 +285,11 @@ post '/set/:name' => sub {
 
 	# Persist and update Warewulf
 	$db->persist($nodeSet);
-	$dhcp->persist();
+	#$dhcp->persist();
 	$hostsfile->update_datastore();
-	$pxe->update($node);
+	#$pxe->update($node);
+
+	my $result = "bin/provision $id";
 
 	template 'success.tt', {
 		'newaddr' => "/node/view/$name"
