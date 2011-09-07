@@ -28,5 +28,6 @@ triggers the update. Make sure that bin/provision is owned
 by root, but nothing else should be. The source to this
 binary is in csrc/provision.c.
 
-This is an ugly, ugly hack and will be changed as soon as
-I find a better way to do it.
+I really need to find a better way to do this: the Perl
+script implements some argument checking, but it's still
+not best practices.
